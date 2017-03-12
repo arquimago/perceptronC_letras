@@ -117,14 +117,14 @@ int main(int argc, char* argv[]){
 	printf("Arquivo de treinamento carregado!\n");
 	memset(target,0,sizeof(target));
 	for(i=0;i<EXEMPLOS;i++){
-		fscanf(input,"%c ",&letra);
+		fscanf(input," %c",&letra);
 		letraTarget(letra,target[i]);
 		printf("Target Carregado %d\n", i);
 		targetLetra(target[i]);
 		for(j=0;j<7;j++){
 			for(k=0;k<9;k++){
-				fscanf(input,"%d ",entrada[i][j][k]);
-				printf("lido linha %d cluna %d\n ", j, k);
+				fscanf(input,"%d",&entrada[i][j][k]);
+				printf("lido linha %d coluna %d\n ", j, k);
 			}
 		}
 	}
