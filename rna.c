@@ -5,19 +5,19 @@
 #include <time.h>
 
 #define LEARNING_RATE    1.0
-#define MAX_ITERATION    1000
+#define MAX_ITERATION    10000
 #define EXEMPLOS 21
 
-double peso[7][7][9];
-double bias[7];
+float peso[7][7][9];
+float bias[7];
 
-double randomFloat(){
-    return (double)rand() / (double)RAND_MAX;
+float randomFloat(){
+    return (float)rand() / (float)RAND_MAX;
 }
 
-void calculaSaida(int entrada[][], int saida[]){
+void calculaSaida(int entrada[7][9], int saida[7]){
     int i,j,k;
-	double soma;
+	float soma;
 	
 	for(i=0;i<7;i++){
 		soma=0.0;
@@ -105,25 +105,30 @@ int main(int argc, char* argv[]){
 	int target[EXEMPLOS][7];
 	int teste[7][9];
 	int saida[7];
-	int i,j,k,epoca;
+	int i,j,k,l,epoca;
 	char letra;	
-	double erroLocal, erroGlobal;
+	float erroLocal[7], erroGlobal;
 	//captura entrada de treinamento
 	FILE* input = fopen(argv[1], "r");
 	if(input==NULL){
 		printf("Falha no acesso ao arquivo de treinamento");
 		exit(42);
 	}
+	printf("Arquivo de treinamento carregado!\n");
 	memset(target,0,sizeof(target));
 	for(i=0;i<EXEMPLOS;i++){
-		fscanf(input,"%c",&letra);
-		letraTarget(letra,&target[i]);
+		fscanf(input,"%c ",&letra);
+		letraTarget(letra,target[i]);
+		printf("Target Carregado %d\n", i);
+		targetLetra(target[i]);
 		for(j=0;j<7;j++){
 			for(k=0;k<9;k++){
-				fscanf(input,"%d",entrada[i][j][k]);
+				fscanf(input,"%d ",entrada[i][j][k]);
+				printf("lido linha %d cluna %d\n ", j, k);
 			}
 		}
 	}
+	printf("Arquivo de treinamento copiado pra memoria!\n");
 	//inicia pesos aleatórios
 	for(i=0;i<7;i++){
 		for(j=0;j<7;j++){
@@ -131,14 +136,30 @@ int main(int argc, char* argv[]){
 				peso[i][j][k] = randomFloat();
 			}
 		}
+		bias[i] = randomFloat();
 	}
 	//treina a rede
 	epoca=0;
 	do{
 		epoca++;
 		erroGlobal=0;
-		
-	}while(globalError != 0 && epoca<=MAX_ITERATION);
+		printf("Epoca %d\n", epoca);
+		for(i=0;i<EXEMPLOS;i++){
+			calculaSaida(entrada[i],saida);
+			for(j=0;j<7;j++) {
+				erroLocal[j] = target[i][j]-saida[j];
+				erroGlobal += (erroLocal[j]*erroLocal[j]);
+			}
+			for(j=0;j<7;j++){
+				for(k=0;k<7;k++){
+					for(l=0;l<9;l++){
+						peso[j][k][l] += LEARNING_RATE * erroLocal[j] * entrada[i][k][l];
+					}
+				}
+				bias[j] += LEARNING_RATE * erroLocal[j];
+			}
+		}
+	}while(erroGlobal != 0 && epoca <= MAX_ITERATION);
 
 	//testa a rede
 	fclose(input);
