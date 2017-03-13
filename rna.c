@@ -8,21 +8,22 @@
 #define MAX_ITERATION    10000
 #define EXEMPLOS 21
 
-float peso[7][7][9];
+float peso[7][9][7];
 float bias[7];
 
 float randomFloat(){
-    return (float)rand() / (float)RAND_MAX;
+    //return (float)rand() / (float)RAND_MAX;
+	return 0.0;
 }
 
-void calculaSaida(int entrada[7][9], int saida[7]){
+void calculaSaida(int entrada[9][7], int saida[7]){
     int i,j,k;
 	float soma;
 	
 	for(i=0;i<7;i++){
 		soma=0.0;
-		for(j=0;j<7;j++){
-			for(k=0;k<9;k++){
+		for(j=0;j<9;j++){
+			for(k=0;k<7;k++){
 				soma+=entrada[j][k]*peso[i][j][k];
 			}
 		}
@@ -101,38 +102,41 @@ void targetLetra(int *target){
 
 int main(int argc, char* argv[]){
 	srand(time(NULL));
-	int entrada[EXEMPLOS][7][9];
+	int entrada[EXEMPLOS][9][7];
 	int target[EXEMPLOS][7];
-	int teste[7][9];
+	int teste[9][7];
 	int saida[7];
 	int i,j,k,l,epoca;
 	char letra;	
 	float erroLocal[7], erroGlobal;
 	//captura entrada de treinamento
-	FILE* input = fopen(argv[1], "r");
-	if(input==NULL){
+	FILE* arqTreino = fopen(argv[1], "r");
+	FILE* arqTestes = fopen(argv[2], "r");
+	if(arqTreino==NULL){
 		printf("Falha no acesso ao arquivo de treinamento");
 		exit(42);
 	}
 	printf("Arquivo de treinamento carregado!\n");
 	memset(target,0,sizeof(target));
 	for(i=0;i<EXEMPLOS;i++){
-		fscanf(input," %c",&letra);
+		fscanf(arqTreino," %c",&letra);
 		letraTarget(letra,target[i]);
-		printf("Target Carregado %d\n", i);
+		printf("Target Carregado %d: ", i+1);
 		targetLetra(target[i]);
-		for(j=0;j<7;j++){
-			for(k=0;k<9;k++){
-				fscanf(input,"%d",&entrada[i][j][k]);
-				printf("lido linha %d coluna %d\n ", j, k);
+		for(j=0;j<9;j++){
+			for(k=0;k<7;k++){
+				fscanf(arqTreino,"%d",&entrada[i][j][k]);
+				//printf("%d ", entrada[i][j][k]);
 			}
+			//printf("\n");
 		}
 	}
 	printf("Arquivo de treinamento copiado pra memoria!\n");
+	system("pause");
 	//inicia pesos aleatórios
 	for(i=0;i<7;i++){
-		for(j=0;j<7;j++){
-			for(k=0;k<9;k++){
+		for(j=0;j<9;j++){
+			for(k=0;k<7;k++){
 				peso[i][j][k] = randomFloat();
 			}
 		}
@@ -151,33 +155,38 @@ int main(int argc, char* argv[]){
 				erroGlobal += (erroLocal[j]*erroLocal[j]);
 			}
 			for(j=0;j<7;j++){
-				for(k=0;k<7;k++){
-					for(l=0;l<9;l++){
-						peso[j][k][l] += LEARNING_RATE * erroLocal[j] * entrada[i][k][l];
+				for(k=0;k<9;k++){
+					for(l=0;l<7;l++){
+						peso[j][k][l] += (float)LEARNING_RATE * erroLocal[j] * entrada[i][k][l];
 					}
 				}
-				bias[j] += LEARNING_RATE * erroLocal[j];
+				bias[j] += (float)LEARNING_RATE * erroLocal[j];
 			}
 		}
+		
 	}while(erroGlobal != 0 && epoca <= MAX_ITERATION);
-
+	printf("treinada!\n");
 	//testa a rede
-	fclose(input);
-	input = fopen(argv[2], "r");
-	if(input==NULL){
+	fclose(arqTreino);
+	if(arqTestes==NULL){
 		printf("Falha no acesso ao arquivo de testes");
 		exit(51);
 	}
-	while(fscanf(input,"%c",&letra)!=EOF){
-		for(i=0;i<7;i++){
-			for(j=0;j<9;j++){
-				fscanf(input,"%d",teste[i][j]);
+	
+	for(i=0;i<EXEMPLOS;i++){
+		fscanf(arqTestes," %c",&letra);
+		//printf("%c\n", letra);
+		for(j=0;j<9;j++){
+			for(k=0;k<7;k++){
+				fscanf(arqTestes,"%d",&teste[j][k]);
+				//printf("%d ", teste[j][k]);
 			}
+			//printf("\n");
 		}
 		calculaSaida(teste,saida);
 		printf("Para o teste %d resultado: ", i);
 		targetLetra(saida);
 	}
-	fclose(input);
+	fclose(arqTestes);
 	return 0;
 }
