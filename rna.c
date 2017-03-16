@@ -34,6 +34,7 @@ void calculaSaida(int entrada[9][7], int saida[7]){
 	}
 }
 
+//função auxiliar pra transformar o caracter da entrada em vetor de target
 void letraTarget(char letra, int *target){
 	switch(letra){
 		case 'a':
@@ -63,6 +64,7 @@ void letraTarget(char letra, int *target){
 	}
 }
 
+//funcao auxiliar pra imprimir as letras a partir de uma saída
 void targetLetra(int *target){
 	int i;
 	for(i=0;i<7;i++){
@@ -124,7 +126,6 @@ int main(){
 	char letra;	
 	float erroLocal[7], erroGlobal;
 	//captura entrada de treinamento
-	printf("Arquivo de treinamento carregado!\n");
 	memset(target,0,sizeof(target));
 	for(i=0;i<EXEMPLOS;i++){
 		fscanf(arqTreino," %c",&letra);
