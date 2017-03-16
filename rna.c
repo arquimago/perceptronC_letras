@@ -6,7 +6,8 @@
 
 #define LEARNING_RATE    1.0
 #define MAX_ITERATION    10000
-#define EXEMPLOS 21
+//#define EXEMPLOS 21
+//#define TESTES 21
 
 float peso[7][9][7];
 float bias[7];
@@ -100,8 +101,21 @@ void targetLetra(int *target){
 }
 
 
-int main(int argc, char* argv[]){
+int main(){
 	srand(time(NULL));
+	FILE* arqTreino = fopen("input.txt", "r");
+	FILE* arqTestes = fopen("testes.txt", "r");
+	if(arqTreino==NULL){
+		printf("Falha no acesso ao arquivo de treinamento");
+		exit(42);
+	}
+	if(arqTestes==NULL){
+		printf("Falha no acesso ao arquivo de testes");
+		exit(51);
+	}
+	int EXEMPLOS, TESTES;
+	fscanf(arqTreino, "%d", &EXEMPLOS);
+	fscanf(arqTestes," %d", &TESTES);
 	int entrada[EXEMPLOS][9][7];
 	int target[EXEMPLOS][7];
 	int teste[9][7];
@@ -110,12 +124,6 @@ int main(int argc, char* argv[]){
 	char letra;	
 	float erroLocal[7], erroGlobal;
 	//captura entrada de treinamento
-	FILE* arqTreino = fopen(argv[1], "r");
-	FILE* arqTestes = fopen(argv[2], "r");
-	if(arqTreino==NULL){
-		printf("Falha no acesso ao arquivo de treinamento");
-		exit(42);
-	}
 	printf("Arquivo de treinamento carregado!\n");
 	memset(target,0,sizeof(target));
 	for(i=0;i<EXEMPLOS;i++){
@@ -126,13 +134,10 @@ int main(int argc, char* argv[]){
 		for(j=0;j<9;j++){
 			for(k=0;k<7;k++){
 				fscanf(arqTreino,"%d",&entrada[i][j][k]);
-				//printf("%d ", entrada[i][j][k]);
 			}
-			//printf("\n");
 		}
 	}
 	printf("Arquivo de treinamento copiado pra memoria!\n");
-	system("pause");
 	//inicia pesos aleatórios
 	for(i=0;i<7;i++){
 		for(j=0;j<9;j++){
@@ -168,23 +173,15 @@ int main(int argc, char* argv[]){
 	printf("treinada!\n");
 	//testa a rede
 	fclose(arqTreino);
-	if(arqTestes==NULL){
-		printf("Falha no acesso ao arquivo de testes");
-		exit(51);
-	}
-	
-	for(i=0;i<EXEMPLOS;i++){
+	for(i=0;i<TESTES;i++){
 		fscanf(arqTestes," %c",&letra);
-		//printf("%c\n", letra);
 		for(j=0;j<9;j++){
 			for(k=0;k<7;k++){
 				fscanf(arqTestes,"%d",&teste[j][k]);
-				//printf("%d ", teste[j][k]);
 			}
-			//printf("\n");
 		}
 		calculaSaida(teste,saida);
-		printf("Para o teste %d resultado: ", i);
+		printf("Para o teste %d resultado: ", i+1);
 		targetLetra(saida);
 	}
 	fclose(arqTestes);
